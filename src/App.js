@@ -4,6 +4,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { Route, Switch, Router } from 'react-router-dom'
 import HomePage from './components/HomePage';
 import PokemonList from './components/PokemonList';
+import Pokemon from './components/Pokemon';
 
 export default class App extends React.Component{
   render() {
@@ -12,6 +13,7 @@ export default class App extends React.Component{
         <Switch>
           <Route path='/' component={HomePage} exact />
           <Route path='/main' component={PokemonList} />
+          <Route path='/pokemon/:id' component={Pokemon} />
         </Switch>
       </div>
     );

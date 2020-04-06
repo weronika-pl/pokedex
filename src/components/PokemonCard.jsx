@@ -1,18 +1,34 @@
 import React from 'react'
+import axios from 'axios'
+import { Link } from 'react-router-dom';
 
-export default class Pokemon extends React.Component{
+export default class PokemonCard extends React.Component{
+    state = {
+        types: []
+    }
+
+    async componentDidMount(){
+        const pokemonInfoUrl = `https://pokeapi.co/api/v2/pokemon/${this.props.id}/`
+        const pokemonRespond = await axios.get(pokemonInfoUrl)
+        const types = pokemonRespond.data.types.map(type => type.type.name);
+        this.setState({types: types})
+    }
+
     render(){
         return(
-            <div className="card grass">
+            <div className={`card ${this.state.types[0]}`}>
+                <Link to={'pokemon/' + this.props.id}></Link>
                 <img
                     className="card-img-top" 
-                    src="https://vignette.wikia.nocookie.net/pokemony/images/4/43/Bulbasaur.png/revision/latest/scale-to-width-down/350?cb=20150824101614&path-prefix=pl" 
-                    alt="Card image cap" 
+                    src={ `https://pokeres.bastionbot.org/images/pokemon/${this.props.id}.png` }
+                    alt={this.props.name} 
                 />
                 <div className="card-body">
-                    <h5 className="card-title">Bulbasaur</h5>
+                    <h5 className="card-title">{this.props.name[0].toUpperCase().concat(this.props.name.slice(1))}</h5>
                     <div className='types'>
-                        <div className='type grass2'>Grass</div><div className='type poison2'>Poison</div>
+                        {this.state.types.map(type =>
+                            <div className={`type ${type}2`}>{type}</div>
+                        )}
                     </div>
                 </div>
             </div>

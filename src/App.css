@@ -192,12 +192,24 @@
 .card{
   border-radius: 25px !important;
   text-align: center !important;
+  min-width: 200px !important;
+  min-height: 150px !important;
+  margin: 10px;
+}
+
+.card-deck{
+  margin: 30px !important;
 }
 
 .card-img-top{
   width: 125px !important;
   max-width: 100% !important;
   height: 125px !important;
+}
+
+.loading{
+  width: 200px;
+  height: 200px;
 }
 
 .navbar-brand{
@@ -209,6 +221,12 @@
 
 .opacity{
   filter: opacity(.5)
+}
+
+.pokeball{
+  width: 50%;
+  height: 50%;
+  margin: 0 auto;
 }
 
 .pokedex{
