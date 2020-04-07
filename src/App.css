@@ -207,9 +207,37 @@
   height: 125px !important;
 }
 
+.card-img-big{
+  width: 200px;
+  height: 200px;
+}
+
+.col-md-3{
+  font-weight: bold !important;
+  text-align: right !important;
+}
+
+.data{
+  text-align: left;
+  display: table-cell;
+}
+
+.fa-mars{
+  color: #76BDFB;
+}
+
+.fa-venus{
+  margin-left: 10px;
+  color: #D5807C;
+}
+
 .loading{
   width: 200px;
   height: 200px;
+}
+
+.moves-tab{
+  text-align: center;
 }
 
 .navbar-brand{
@@ -231,6 +259,15 @@
 
 .pokedex{
   height: 100vh;
+}
+
+.table{
+  table-layout:fixed !important;
+}
+
+.title{
+  text-align: right;
+  display: table-cell;
 }
 
 .type{

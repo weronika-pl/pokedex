@@ -13,7 +13,7 @@ export default class App extends React.Component{
         <Switch>
           <Route path='/' component={HomePage} exact />
           <Route path='/main' component={PokemonList} />
-          <Route path='/pokemon/:id' component={Pokemon} />
+          <Route path='/pokemon/:id/:type' component={Pokemon} />
         </Switch>
       </div>
     );

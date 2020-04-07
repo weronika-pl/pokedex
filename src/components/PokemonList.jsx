@@ -12,7 +12,15 @@ export default class PokemonList extends React.Component{
 
     async componentDidMount(){
         const respond = await axios.get(this.state.url)
-        this.timerId = setTimeout(()=> this.setState({pokemonList: respond.data['results']}), 3000)
+        let pokemonList = respond.data['results']
+        for (let pokemon of pokemonList){
+            pokemon.id = pokemon.url.split('/')[pokemon.url.split('/').length - 2];
+            pokemon.infoUrl = `https://pokeapi.co/api/v2/pokemon/${pokemon.id}/`;
+            const pokemonRespond = await axios.get(pokemon.infoUrl);
+            pokemon.types = pokemonRespond.data.types.map(type => type.type.name);
+            pokemon.mainType = pokemonRespond.data.types.find(type => type.slot === 1).type.name
+        }
+        this.timerId = setTimeout(()=> this.setState({pokemonList: pokemonList}), 3000)
     }
 
     componentWillUnmount(){
@@ -28,9 +36,11 @@ export default class PokemonList extends React.Component{
                     ? this.state.pokemonList.map(pokemon => 
                             <PokemonCard
                                 key={pokemon.name}
-                                id={pokemon.url.split('/')[pokemon.url.split('/').length - 2]}
+                                id={pokemon.id}
                                 name={pokemon.name}
                                 url={pokemon.url}
+                                types={pokemon.types}
+                                mainType={pokemon.mainType}
                             />
                         )
                     : <div className='pokeball'>
