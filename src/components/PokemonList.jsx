@@ -3,11 +3,23 @@ import PokemonCard from './PokemonCard'
 import Navbar from './Navbar';
 import axios from 'axios';
 import Pokeball from './pokeball.gif'
+import Pagination from './Pagination';
 
 export default class PokemonList extends React.Component{
     state = {
         url: 'https://pokeapi.co/api/v2/pokemon?offset=0&limit=807"',
         pokemonList: null,
+        currentPage: 1,
+        idPerPage: 30,
+        currentListOfPokemon: null
+    }
+
+    paginate = pageNumber => {
+        let currentPage = pageNumber;
+        const idOfLastPokemon = currentPage * this.state.idPerPage;
+        const idOfFirstPokemon = idOfLastPokemon - this.state.idPerPage;
+        const currentListOfPokemon = this.state.pokemonList.slice(idOfFirstPokemon, idOfLastPokemon);
+        this.setState({currentPage, currentListOfPokemon})
     }
 
     async componentDidMount(){
@@ -20,7 +32,10 @@ export default class PokemonList extends React.Component{
             pokemon.types = pokemonRespond.data.types.map(type => type.type.name);
             pokemon.mainType = pokemonRespond.data.types.find(type => type.slot === 1).type.name
         }
-        this.timerId = setTimeout(()=> this.setState({pokemonList: pokemonList}), 3000)
+        const idOfLastPokemon = this.state.currentPage * this.state.idPerPage;
+        const idOfFirstPokemon = idOfLastPokemon - this.state.idPerPage;
+        const currentListOfPokemon = pokemonList.slice(idOfFirstPokemon, idOfLastPokemon);
+        this.timerId = setTimeout(()=> this.setState({pokemonList, currentListOfPokemon}), 3000)
     }
 
     componentWillUnmount(){
@@ -32,8 +47,8 @@ export default class PokemonList extends React.Component{
             <React.Fragment>
             <Navbar />
             <div className="card-deck">
-                {this.state.pokemonList 
-                    ? this.state.pokemonList.map(pokemon => 
+                {this.state.currentListOfPokemon 
+                    ? this.state.currentListOfPokemon.map(pokemon => 
                             <PokemonCard
                                 key={pokemon.name}
                                 id={pokemon.id}
@@ -48,6 +63,9 @@ export default class PokemonList extends React.Component{
                     </div>
                 }
             </div>
+            {this.state.pokemonList
+            ? <Pagination idPerPage={this.state.idPerPage} totalPokemon={this.state.pokemonList.length} paginate={this.paginate} />
+            : <div></div>}
             </React.Fragment>
         )
     }

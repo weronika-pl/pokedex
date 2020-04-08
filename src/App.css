@@ -236,8 +236,12 @@
   height: 200px;
 }
 
-.moves-tab{
+.moves{
   text-align: center;
+  flex-wrap: wrap !important;
+  flex-direction: row !important;
+  justify-content: space-around !important;
+  display: flex !important;
 }
 
 .navbar-brand{
@@ -251,6 +255,16 @@
   filter: opacity(.5)
 }
 
+.page-link{
+  color: #E5383A !important;
+  border-color: #E5383A !important;
+}
+
+.page-link:hover{
+  background-color: #E5383A !important;
+  color: white !important;
+}
+
 .pokeball{
   width: 50%;
   height: 50%;
@@ -259,6 +273,16 @@
 
 .pokedex{
   height: 100vh;
+  max-width: 100vh;
+}
+
+.sm-card{
+  height: fit-content !important;
+  width: 150px !important;
+  border-radius: 25px !important;
+  text-align: center !important;
+  padding: 20px;
+  margin: 20px !important;
 }
 
 .table{

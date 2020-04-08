@@ -362,26 +362,14 @@ export default class Pokemon extends React.Component{
                         </div>
                       </div>
                     </div>
-                    <div className="tab-pane fade" id="moves" role="tabpanel" aria-labelledby="moves-tab">
-                      <table class="table table-borderless ">
-                            <thead>
-                              <tr>
-                                <th className='title' scope="col">#</th>
-                                <th className='data' scope="col">Move</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {this.state.moves.map((move, index) => {
-                                return(
-                                <tr key={index}>
-                                  <th className='title' scope="row">{index+1}</th>
-                                  <td className='data'>{move}</td>
-                                </tr>
-                                )
-                                })
-                              }
-                          </tbody>
-                        </table>
+                    <div className="tab-pane fade moves" id="moves" role="tabpanel" aria-labelledby="moves-tab">
+                      {this.state.moves.map(move => {
+                        return(
+                          <div className={`${this.state.mainType} sm-card`}>
+                              <h5>{move}</h5>
+                          </div>
+                        )
+                      })}
                     </div>
                 </div>
             </React.Fragment>
