@@ -15,7 +15,7 @@ export default class Pagination extends React.Component{
 
     render(){
         return(
-            <nav aria-label="Page navigation example">
+            <nav aria-label="Page navigation pages">
                 <ul className="pagination justify-content-center">
                     {this.state.pageNumbers.map(number => {
                         return(

@@ -27,8 +27,6 @@ export default class Pokemon extends React.Component{
     abilities: '',
     genderRatioMale: '',
     genderRatioFemale: '',
-    evs: '',
-    hatchSteps: '',
   }
 
     async componentDidMount(){
@@ -83,22 +81,6 @@ export default class Pokemon extends React.Component{
           .join(' ');
       }).join(', ');
 
-      const evs = pokemonRespond.data.stats
-        .filter(stat => {
-          if (stat.effort > 0) {
-            return true;
-          }
-          return false;
-        })
-        .map(stat => {
-          return `${stat.effort} ${stat.stat.name
-            .toLowerCase()
-            .split('-')
-            .map(s => s.charAt(0).toUpperCase() + s.substring(1))
-            .join(' ')}`;
-        })
-        .join(', ');
-
       await axios.get(pokemonSpeciesUrl).then(res => {
         let description = '';
         res.data.flavor_text_entries.some(flavor => {
@@ -120,14 +102,12 @@ export default class Pokemon extends React.Component{
               .join(' ');
           })
           .join(', ');
-        const hatchSteps = 255 * (res.data['hatch_counter'] + 1);
         this.setState({
           description,
           genderRatioFemale,
           genderRatioMale,
           catchRate,
           eggGroups,
-          hatchSteps,
         });
       });
 
@@ -148,7 +128,6 @@ export default class Pokemon extends React.Component{
       height,
       weight,
       abilities,
-      evs,
       moves
     });
   }  
@@ -193,6 +172,10 @@ export default class Pokemon extends React.Component{
                           <tr>
                             <th className='title' scope="row">Abilities</th>
                             <td className='data'>{this.state.abilities}</td>
+                          </tr>
+                          <tr>
+                            <th className='title' scope="row">Catch Rate</th>
+                            <td className='data'>{this.state.catchRate}%</td>
                           </tr>
                         </tbody>
                       </table>

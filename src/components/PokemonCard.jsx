@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 export default class PokemonCard extends React.Component{
     render(){
         return(
-            <div className={`card ${this.props.mainType}`}>
+            <div className={`card ${this.props.mainType} grey`}>
                 <Link to={'pokemon/' + this.props.id + '/' + this.props.mainType}>
                 <img
                     className="card-img-top" 

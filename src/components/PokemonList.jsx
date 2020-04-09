@@ -4,6 +4,8 @@ import Navbar from './Navbar';
 import axios from 'axios';
 import Pokeball from './pokeball.gif'
 import Pagination from './Pagination';
+import Filters from './Filters';
+import { types } from '../Data'
 
 export default class PokemonList extends React.Component{
     state = {
@@ -11,7 +13,11 @@ export default class PokemonList extends React.Component{
         pokemonList: null,
         currentPage: 1,
         idPerPage: 30,
-        currentListOfPokemon: null
+        currentListOfPokemon: null,
+        filterByTypes: [],
+        filterByName: [],
+        types: types,
+        names: null
     }
 
     paginate = pageNumber => {
@@ -20,6 +26,52 @@ export default class PokemonList extends React.Component{
         const idOfFirstPokemon = idOfLastPokemon - this.state.idPerPage;
         const currentListOfPokemon = this.state.pokemonList.slice(idOfFirstPokemon, idOfLastPokemon);
         this.setState({currentPage, currentListOfPokemon})
+    }
+
+    filtering = e =>{
+        let filter = e.target.value.toLowerCase();
+        console.log(filter)
+        let types = this.state.types;
+        let names = this.state.names;
+        let filterByTypes = this.state.filterByTypes;
+        let filterByName = this.state.filterByName;
+        if (Object.keys(types).some(type => type === filter)){
+            types[filter] = !types[filter];
+            if (types[filter]){
+                filterByTypes.push(filter)
+            } else {
+                filterByTypes = filterByTypes.filter(type => type !== filter) 
+            }
+        } else {
+            if (filter){
+                filterByName = names.filter(name => name.includes(filter));
+            } else {
+                filterByName = [];
+            }
+        }
+        console.log(filterByName)
+        console.log(filterByName.length, filterByTypes.length)
+        if (filterByTypes.length && filterByName.length){
+            const filteredPokemonByType = this.state.pokemonList.filter(pokemon => 
+                filterByTypes.some(filteredType => pokemon.types.includes(filteredType)));
+            console.log(filteredPokemonByType)
+            const filteredByAll = filteredPokemonByType.filter(pokemon =>
+                filterByName.some(filteredName => filteredName === pokemon.name));
+            console.log(filteredByAll)
+            return this.setState({filterByTypes, filterByName, currentListOfPokemon: filteredByAll})
+        } else if (!filterByTypes.length && !filterByName.length){
+            let currentPage = this.state.currentPage;
+            const idOfLastPokemon = currentPage * this.state.idPerPage;
+            const idOfFirstPokemon = idOfLastPokemon - this.state.idPerPage;
+            const currentListOfPokemon = this.state.pokemonList.slice(idOfFirstPokemon, idOfLastPokemon);
+            return this.setState({filterByTypes, filterByName, currentListOfPokemon})
+        } else {
+            const activeFilters = filterByTypes.length ? filterByTypes : filterByName;
+            const filteredListByOneFilter = this.state.pokemonList.filter(pokemon => 
+                activeFilters.some(activeFilter => 
+                    filterByTypes.length ? pokemon.types.includes(activeFilter) : activeFilter === pokemon.name));
+            return this.setState({filterByTypes, filterByName, currentListOfPokemon: filteredListByOneFilter})
+        }
     }
 
     async componentDidMount(){
@@ -32,10 +84,11 @@ export default class PokemonList extends React.Component{
             pokemon.types = pokemonRespond.data.types.map(type => type.type.name);
             pokemon.mainType = pokemonRespond.data.types.find(type => type.slot === 1).type.name
         }
+        const names = pokemonList.map(pokemon => pokemon.name);
         const idOfLastPokemon = this.state.currentPage * this.state.idPerPage;
         const idOfFirstPokemon = idOfLastPokemon - this.state.idPerPage;
         const currentListOfPokemon = pokemonList.slice(idOfFirstPokemon, idOfLastPokemon);
-        this.timerId = setTimeout(()=> this.setState({pokemonList, currentListOfPokemon}), 3000)
+        this.timerId = setTimeout(()=> this.setState({pokemonList, currentListOfPokemon, names}), 3000)
     }
 
     componentWillUnmount(){
@@ -45,7 +98,8 @@ export default class PokemonList extends React.Component{
     render(){
         return(
             <React.Fragment>
-            <Navbar />
+            <Navbar filtering={this.filtering} />
+            <Filters types={this.state.types} filtering={this.filtering} />
             <div className="card-deck">
                 {this.state.currentListOfPokemon 
                     ? this.state.currentListOfPokemon.map(pokemon => 
