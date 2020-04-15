@@ -3,9 +3,9 @@ import PokemonCard from './PokemonCard'
 import Navbar from './Navbar';
 import axios from 'axios';
 import Pokeball from './pokeball.gif'
-import Pagination from './Pagination';
 import Filters from './Filters';
-import { types } from '../Data'
+import { types } from '../Data';
+import ReactPaginate from 'react-paginate'
 
 export default class PokemonList extends React.Component{
     state = {
@@ -17,91 +17,138 @@ export default class PokemonList extends React.Component{
         filterByTypes: [],
         filterByName: [],
         types: types,
-        names: null
+        names: null,
+        initialyLoaded: false,
+        fullLoaded: false,
+        allPokemon: null,
+        filteredList: null,
     }
 
-    paginate = pageNumber => {
-        let currentPage = pageNumber;
+    paginate = e => {
+        let currentPage = e.selected+1;
         const idOfLastPokemon = currentPage * this.state.idPerPage;
         const idOfFirstPokemon = idOfLastPokemon - this.state.idPerPage;
-        const currentListOfPokemon = this.state.pokemonList.slice(idOfFirstPokemon, idOfLastPokemon);
+        const currentListOfPokemon = (this.state.filteredList ? this.state.filteredList : this.state.allPokemon).slice(idOfFirstPokemon, idOfLastPokemon);
         this.setState({currentPage, currentListOfPokemon})
     }
 
-    filtering = e =>{
-        let filter = e.target.value.toLowerCase();
-        console.log(filter)
-        let types = this.state.types;
-        let names = this.state.names;
-        let filterByTypes = this.state.filterByTypes;
-        let filterByName = this.state.filterByName;
+    addingTypeFilters = e => {
+        const filter = e.target.value;
+        const types = this.state.types;
+        let currentFiltersByTypes = this.state.filterByTypes;
+        
         if (Object.keys(types).some(type => type === filter)){
             types[filter] = !types[filter];
             if (types[filter]){
-                filterByTypes.push(filter)
+                currentFiltersByTypes.push(filter);
             } else {
-                filterByTypes = filterByTypes.filter(type => type !== filter) 
-            }
-        } else {
-            if (filter){
-                filterByName = names.filter(name => name.includes(filter));
-            } else {
-                filterByName = [];
+                currentFiltersByTypes = currentFiltersByTypes.filter(type => type !== filter);
             }
         }
-        console.log(filterByName)
-        console.log(filterByName.length, filterByTypes.length)
-        if (filterByTypes.length && filterByName.length){
-            const filteredPokemonByType = this.state.pokemonList.filter(pokemon => 
-                filterByTypes.some(filteredType => pokemon.types.includes(filteredType)));
-            console.log(filteredPokemonByType)
-            const filteredByAll = filteredPokemonByType.filter(pokemon =>
-                filterByName.some(filteredName => filteredName === pokemon.name));
-            console.log(filteredByAll)
-            return this.setState({filterByTypes, filterByName, currentListOfPokemon: filteredByAll})
-        } else if (!filterByTypes.length && !filterByName.length){
-            let currentPage = this.state.currentPage;
-            const idOfLastPokemon = currentPage * this.state.idPerPage;
-            const idOfFirstPokemon = idOfLastPokemon - this.state.idPerPage;
-            const currentListOfPokemon = this.state.pokemonList.slice(idOfFirstPokemon, idOfLastPokemon);
-            return this.setState({filterByTypes, filterByName, currentListOfPokemon})
+
+        return currentFiltersByTypes;
+    }
+
+    addingNameFilters = e => {
+        const filter = e.target.value.toLowerCase();
+        const types = this.state.types;
+        const names = this.state.names;
+        let currentFiltersByName = this.state.filterByName;
+
+        if (Object.keys(types).some(type => type === filter)){
+            return currentFiltersByName
+        } else if (filter) {
+            currentFiltersByName = names.filter(name => name.includes(filter))
         } else {
-            const activeFilters = filterByTypes.length ? filterByTypes : filterByName;
-            const filteredListByOneFilter = this.state.pokemonList.filter(pokemon => 
-                activeFilters.some(activeFilter => 
-                    filterByTypes.length ? pokemon.types.includes(activeFilter) : activeFilter === pokemon.name));
-            return this.setState({filterByTypes, filterByName, currentListOfPokemon: filteredListByOneFilter})
+            currentFiltersByName = [];
         }
+
+        return currentFiltersByName
+    }
+
+    filterByType = (pokemonList, resultFilters) => {
+        const filteredPokemonByType = pokemonList.filter(pokemon => 
+            resultFilters.some(filteredType => pokemon.types.includes(filteredType)));
+        return filteredPokemonByType
+    }
+
+    filterByName = (pokemonList, resultFilters) => {
+        const filteredPokemonsByName = pokemonList.filter(pokemon =>
+            resultFilters.some(filteredName => filteredName === pokemon.name));
+        return filteredPokemonsByName
+    }
+
+    filtering = e =>{
+        const resultTypeFilters = this.addingTypeFilters(e);
+        const resultNameFilters = this.addingNameFilters(e);
+        const allPokemonList = this.state.allPokemon;
+
+        const filteredPokemonsByTypes = resultTypeFilters.length 
+        ? this.filterByType(allPokemonList, resultTypeFilters) 
+        : allPokemonList;
+
+        const filteredPokemonsByName = resultNameFilters.length 
+        ? this.filterByName(filteredPokemonsByTypes, resultNameFilters)
+        : filteredPokemonsByTypes
+
+        const firstPagePokemon = filteredPokemonsByName.slice(0, this.state.idPerPage)
+
+        this.setState({ 
+            filteredList: filteredPokemonsByName, 
+            currentListOfPokemon: firstPagePokemon,
+            filterByTypes: resultTypeFilters,
+            filterByName: resultNameFilters,
+            currentPage: 1
+        })
     }
 
     async componentDidMount(){
-        const respond = await axios.get(this.state.url)
-        let pokemonList = respond.data['results']
-        for (let pokemon of pokemonList){
+        const respond = await axios.get(this.state.url);
+        let pokemonList = respond.data['results'];
+        pokemonList.forEach(function(pokemon){
             pokemon.id = pokemon.url.split('/')[pokemon.url.split('/').length - 2];
-            pokemon.infoUrl = `https://pokeapi.co/api/v2/pokemon/${pokemon.id}/`;
-            const pokemonRespond = await axios.get(pokemon.infoUrl);
-            pokemon.types = pokemonRespond.data.types.map(type => type.type.name);
-            pokemon.mainType = pokemonRespond.data.types.find(type => type.slot === 1).type.name
-        }
+        })
+
         const names = pokemonList.map(pokemon => pokemon.name);
         const idOfLastPokemon = this.state.currentPage * this.state.idPerPage;
         const idOfFirstPokemon = idOfLastPokemon - this.state.idPerPage;
-        const currentListOfPokemon = pokemonList.slice(idOfFirstPokemon, idOfLastPokemon);
-        this.timerId = setTimeout(()=> this.setState({pokemonList, currentListOfPokemon, names}), 3000)
-    }
+        const firstPagePokemon = pokemonList.slice(0, this.state.idPerPage);
+        
+        const detailsOfFirstPage = await Promise.all(firstPagePokemon.map(pokemon => {
+            return axios.get(`https://pokeapi.co/api/v2/pokemon/${pokemon.id}`);
+        }))
 
-    componentWillUnmount(){
-        clearTimeout(this.timerId)
+        firstPagePokemon.forEach(function(pokemon){
+            pokemon.types = detailsOfFirstPage[pokemon.id-1].data.types.map(type => type.type.name)
+            pokemon.mainType = detailsOfFirstPage[pokemon.id-1].data.types.find(type => type.slot === 1).type.name
+        })
+
+        this.setState({ initialyLoaded: true, currentListOfPokemon: firstPagePokemon })
+
+        const remainingPokemon = pokemonList.slice(this.state.idPerPage);
+        const detailedRemainings = await Promise.all(remainingPokemon.map(pokemon => {
+            return axios.get(`https://pokeapi.co/api/v2/pokemon/${pokemon.id}`);
+        }))
+
+        remainingPokemon.forEach(function(pokemon){
+            pokemon.types = detailedRemainings[pokemon.id-31].data.types.map(type => type.type.name)
+            pokemon.mainType = detailedRemainings[pokemon.id-31].data.types.find(type => type.slot === 1).type.name
+        })
+
+        const allPokemon = firstPagePokemon.concat(remainingPokemon)
+        this.setState({ fullLoaded: true, allPokemon })
+
+        const currentListOfPokemon = allPokemon.slice(idOfFirstPokemon, idOfLastPokemon);
+        this.setState({pokemonList, currentListOfPokemon, names})
     }
 
     render(){
         return(
             <React.Fragment>
-            <Navbar filtering={this.filtering} />
-            <Filters types={this.state.types} filtering={this.filtering} />
+            <Navbar filtering={this.filtering} isLoaded={this.state.fullLoaded} />
+            <Filters types={this.state.types} filtering={this.filtering} isLoaded={this.state.fullLoaded} />
             <div className="card-deck">
-                {this.state.currentListOfPokemon 
+                {this.state.initialyLoaded 
                     ? this.state.currentListOfPokemon.map(pokemon => 
                             <PokemonCard
                                 key={pokemon.name}
@@ -117,8 +164,20 @@ export default class PokemonList extends React.Component{
                     </div>
                 }
             </div>
-            {this.state.pokemonList
-            ? <Pagination idPerPage={this.state.idPerPage} totalPokemon={this.state.pokemonList.length} paginate={this.paginate} />
+            {this.state.fullLoaded
+            ? <ReactPaginate
+                previousLabel={"prev"}
+                nextLabel={"next"}
+                breakLabel={"..."}
+                breakClassName={"break-me"}
+                pageCount={(this.state.filteredList ? this.state.filteredList.length : this.state.allPokemon.length)/this.state.idPerPage}
+                marginPagesDisplayed={2}
+                pageRangeDisplayed={3}
+                onPageChange={this.paginate}
+                containerClassName={"pagination"}
+                subContainerClassName={"pages pagination"}
+                activeClassName={"active"}
+                forcePage={this.state.currentPage-1}/>
             : <div></div>}
             </React.Fragment>
         )

@@ -13,7 +13,7 @@ export default class Filters extends React.Component{
                     <div className="container">
                         <div className="row">
                             {Object.keys(this.props.types).map(type => {
-                                return <button className={this.props.types[type] ? 'col-sm red' : `col-sm ${type}`} value={type} onClick={this.props.filtering}>{type}</button>
+                                return <button className={this.props.types[type] ? 'col-sm red' : `col-sm ${type}`} value={type} disabled={!this.props.isLoaded} onClick={this.props.filtering}>{type}</button>
                             })}
                         </div>   
                     </div>

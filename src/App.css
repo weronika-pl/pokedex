@@ -284,18 +284,31 @@
   filter: opacity(.5)
 }
 
-.pages{
-  width: 100vw !important;
+.pagination {
+  margin: 15px auto;
+  display: flex;
+  list-style: none;
+  outline: none;
+  justify-content: center;
+  color: #E5383A
 }
 
-.page-link{
-  color: #E5383A !important;
-  border-color: #E5383A !important;
+.pagination > .active > a{
+  background-color: #E5383A ;
+  border-color: #E5383A ;
+  color: white;
 }
 
-.page-link:hover{
-  background-color: #E5383A !important;
-  color: white !important;
+.pagination > li > a{
+  border: 1px solid #E5383A ;
+  padding: 5px 10px;
+  outline: none;
+  cursor: pointer;
+}
+
+.pagination > li > a:hover{
+  background-color: #E5383A;
+  color: white;
 }
 
 .pokeball{
