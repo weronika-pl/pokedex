@@ -12,7 +12,7 @@ export default class Navbar extends React.Component{
           </a>
           </Link>
           <form className="form-inline">
-            <input className="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" onChange={this.props.filtering}/>
+            <input className="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" disabled={!this.props.isLoaded} onChange={this.props.filtering}/>
           </form>
         </nav>
     );
